@@ -142,7 +142,7 @@ def select_shallow_thinking_agent(provider) -> str:
         "google": [
             ("Gemini 2.0 Flash-Lite - Cost efficiency and low latency", "gemini-2.0-flash-lite"),
             ("Gemini 2.0 Flash - Next generation features, speed, and thinking", "gemini-2.0-flash"),
-            ("Gemini 2.5 Flash - Adaptive thinking, cost efficiency", "gemini-2.5-flash-preview-05-20"),
+            ("Gemini 2.5 Flash - Adaptive thinking, cost efficiency", "gemini-2.5-flash"),
         ],
         "deepseek": [
             ("DeepSeek Chat - DeepSeek-V3-0324", "deepseek-chat"),

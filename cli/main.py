@@ -750,7 +750,7 @@ def run_analysis():
     )
 
     # Create result directory
-    results_dir = Path(config["results_dir"]) / selections["ticker"] / selections["analysis_date"] / config["llm_provider"]
+    results_dir = Path(config["results_dir"]) / selections["ticker"] / selections["analysis_date"] / config["llm_provider"] / f"{config['quick_think_llm']}_{config['deep_think_llm']}"
     results_dir.mkdir(parents=True, exist_ok=True)
     report_dir = results_dir / "reports"
     report_dir.mkdir(parents=True, exist_ok=True)
