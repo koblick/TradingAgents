@@ -13,6 +13,7 @@ DEFAULT_CONFIG = {
     "FINNHUB_API_KEY": os.getenv("FINNHUB_API_KEY"),
     "GOOGLE_API_KEY": os.getenv("GOOGLE_API_KEY"),
     "ANTHROPIC_API_KEY": os.getenv("ANTHROPIC_API_KEY"),
+    "DEEPSEEK_API_KEY": os.getenv("DEEPSEEK_API_KEY"),
     # LLM settings
     "llm_provider": "openai",
     "deep_think_llm": "o4-mini",
