@@ -190,13 +190,13 @@ def select_deep_thinking_agent(provider) -> str:
     # Define deep thinking llm engine options with their corresponding model names
     DEEP_AGENT_OPTIONS = {
         "openai": [
-            ("GPT-4.1-nano - Ultra-lightweight model for basic operations", "gpt-4.1-nano"),
-            ("GPT-4.1-mini - Compact model with good performance", "gpt-4.1-mini"),
-            ("GPT-4o - Standard model with solid capabilities", "gpt-4o"),
-            ("o4-mini - Specialized reasoning model (compact)", "o4-mini"),
-            ("o3-mini - Advanced reasoning model (lightweight)", "o3-mini"),
             ("o3 - Full advanced reasoning model", "o3"),
             ("o1 - Premier reasoning and problem-solving model", "o1"),
+            ("o4-mini - Specialized reasoning model (compact)", "o4-mini"),
+            ("o3-mini - Advanced reasoning model (lightweight)", "o3-mini"),
+            ("GPT-4o - Standard model with solid capabilities", "gpt-4o"),
+            ("GPT-4.1-mini - Compact model with good performance", "gpt-4.1-mini"),
+            ("GPT-4.1-nano - Ultra-lightweight model for basic operations", "gpt-4.1-nano"),
         ],
         "anthropic": [
             ("Claude Haiku 3.5 - Fast inference and standard capabilities", "claude-3-5-haiku-latest"),
@@ -206,14 +206,14 @@ def select_deep_thinking_agent(provider) -> str:
             ("Claude Opus 4 - Most powerful Anthropic model", "	claude-opus-4-0"),
         ],
         "google": [
-            ("Gemini 2.0 Flash-Lite - Cost efficiency and low latency", "gemini-2.0-flash-lite"),
-            ("Gemini 2.0 Flash - Next generation features, speed, and thinking", "gemini-2.0-flash"),
-            ("Gemini 2.5 Flash - Adaptive thinking, cost efficiency", "gemini-2.5-flash-preview-05-20"),
             ("Gemini 2.5 Pro", "gemini-2.5-pro-preview-06-05"),
+            ("Gemini 2.5 Flash - Adaptive thinking, cost efficiency", "gemini-2.5-flash-preview-05-20"),
+            ("Gemini 2.0 Flash - Next generation features, speed, and thinking", "gemini-2.0-flash"),
+            ("Gemini 2.0 Flash-Lite - Cost efficiency and low latency", "gemini-2.0-flash-lite"),
         ],
         "deepseek": [
-            ("DeepSeek Chat - DeepSeek-V3-0324", "deepseek-chat"),
             ("DeepSeek Reasoner - DeepSeek-R1-0528", "deepseek-reasoner"),
+            ("DeepSeek Chat - DeepSeek-V3-0324", "deepseek-chat"),
         ],
         "openrouter": [
             ("DeepSeek V3 - a 685B-parameter, mixture-of-experts model", "deepseek/deepseek-chat-v3-0324:free"),
