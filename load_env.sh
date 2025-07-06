@@ -13,6 +13,7 @@ if [ ! -f ".env" ]; then
     echo "Please create a .env file with your API keys:"
     echo "   FINNHUB_API_KEY=your_finnhub_key_here"
     echo "   OPENAI_API_KEY=your_openai_key_here"
+    echo "   GOOGLE_API_KEY=your_google_key_here (for Gemini)"
     exit 1
 fi
 
@@ -27,12 +28,14 @@ if [ -z "$FINNHUB_API_KEY" ] || [ -z "$OPENAI_API_KEY" ]; then
     echo "Please check that your .env file contains:"
     echo "   FINNHUB_API_KEY=your_finnhub_key_here"
     echo "   OPENAI_API_KEY=your_openai_key_here"
+    echo "   GOOGLE_API_KEY=your_google_key_here (for Gemini)"
     exit 1
 fi
 
 echo "✅ API keys loaded successfully!"
 echo "   FINNHUB_API_KEY: ${FINNHUB_API_KEY:0:8}..."
 echo "   OPENAI_API_KEY: ${OPENAI_API_KEY:0:8}..."
+echo "   GOOGLE_API_KEY: ${GOOGLE_API_KEY:0:8}..."
 echo ""
 echo "🎉 You can now run TradingAgents!"
 echo ""
