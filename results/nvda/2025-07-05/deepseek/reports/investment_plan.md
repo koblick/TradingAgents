@@ -1,10 +1,3 @@
-### Bull Researcher Analysis
-**Question for the Bear**: If NVDA’s so overvalued, why is every hedge fund and sovereign wealth fund *still accumulating*? (Hint: They see the $10T AI prize.)
-
-### Bear Researcher Analysis
-**Question for the Bull**: If NVDA’s so bulletproof, why did insiders sell $1B *now*—after a 1,000% run? (Hint: They know growth peaks are *always* followed by troughs.)
-
-### Research Manager Decision
 ### My Recommendation: **SELL (Trim Position Aggressively)**  
 
 ### Rationale: The Bear's Valuation and Risk Arguments Are More Convincing  
