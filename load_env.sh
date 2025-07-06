@@ -14,6 +14,7 @@ if [ ! -f ".env" ]; then
     echo "   FINNHUB_API_KEY=your_finnhub_key_here"
     echo "   OPENAI_API_KEY=your_openai_key_here"
     echo "   GOOGLE_API_KEY=your_google_key_here (for Gemini)"
+    echo "   DEEPSEEK_API_KEY=your_deepseek_key_here"
     exit 1
 fi
 
@@ -29,6 +30,7 @@ if [ -z "$FINNHUB_API_KEY" ] || [ -z "$OPENAI_API_KEY" ]; then
     echo "   FINNHUB_API_KEY=your_finnhub_key_here"
     echo "   OPENAI_API_KEY=your_openai_key_here"
     echo "   GOOGLE_API_KEY=your_google_key_here (for Gemini)"
+    echo "   DEEPSEEK_API_KEY=your_deepseek_key_here"
     exit 1
 fi
 
@@ -36,6 +38,7 @@ echo "✅ API keys loaded successfully!"
 echo "   FINNHUB_API_KEY: ${FINNHUB_API_KEY:0:8}..."
 echo "   OPENAI_API_KEY: ${OPENAI_API_KEY:0:8}..."
 echo "   GOOGLE_API_KEY: ${GOOGLE_API_KEY:0:8}..."
+echo "   DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:0:8}..."
 echo ""
 echo "🎉 You can now run TradingAgents!"
 echo ""

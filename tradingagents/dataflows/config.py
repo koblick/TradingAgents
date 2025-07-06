@@ -28,6 +28,9 @@ def validate_api_keys(config: Dict) -> None:
     elif llm_provider == "google":
         if not config.get("GOOGLE_API_KEY"):
             raise ValueError("GOOGLE_API_KEY is required for Google provider")
+    elif llm_provider == "deepseek":
+        if not config.get("DEEPSEEK_API_KEY"):
+            raise ValueError("DEEPSEEK_API_KEY is required for DeepSeek provider")
 
 
 def initialize_config():
