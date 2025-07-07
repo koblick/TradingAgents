@@ -729,7 +729,7 @@ def get_stock_news_openai(ticker, curr_date):
                 "search_context_size": "low",
             }
         ],
-        temperature=1,
+        temperature=0.3, # lower temperature to get more consistent results
         max_output_tokens=4096,
         top_p=1,
         store=True,
