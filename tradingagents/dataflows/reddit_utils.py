@@ -46,6 +46,15 @@ ticker_to_company = {
     "UBER": "Uber",
     "ROKU": "Roku",
     "PINS": "Pinterest",
+    "DE": "Deere & Company",
+    "BA": "Boeing",
+    "CVX": "Chevron",
+    "T": "AT&T",
+    "TGT": "Target",
+    "HD": "Home Depot",
+    "WMT": "Walmart",
+    "COST": "Costco",
+    "MCD": "McDonald's",
 }
 
 
