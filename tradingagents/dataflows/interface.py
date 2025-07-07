@@ -15,6 +15,7 @@ import yfinance as yf
 from openai import OpenAI
 from .config import get_config, set_config, DATA_DIR
 
+TEMPERATURE = 0.3
 
 def get_finnhub_news(
     ticker: Annotated[
@@ -729,7 +730,7 @@ def get_stock_news_openai(ticker, curr_date):
                 "search_context_size": "low",
             }
         ],
-        temperature=0.3, # lower temperature to get more consistent results
+        temperature=TEMPERATURE, # lower temperature to get more consistent results
         max_output_tokens=4096,
         top_p=1,
         store=True,
@@ -764,7 +765,7 @@ def get_global_news_openai(curr_date):
                 "search_context_size": "low",
             }
         ],
-        temperature=1,
+        temperature=TEMPERATURE,
         max_output_tokens=4096,
         top_p=1,
         store=True,
@@ -799,7 +800,7 @@ def get_fundamentals_openai(ticker, curr_date):
                 "search_context_size": "low",
             }
         ],
-        temperature=1,
+        temperature=TEMPERATURE,
         max_output_tokens=4096,
         top_p=1,
         store=True,
