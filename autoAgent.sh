@@ -1,7 +1,16 @@
 #!/bin/bash
-# to run ./load_env.sh
-# TradingAgents Environment Loader
-# This script loads API keys from .env file
+
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+# Add uv to PATH
+export PATH="/usr/local/bin:/opt/homebrew/bin:$HOME/.local/bin:$PATH"
+
+# Activate virtual environment if it exists
+if [ -d ".venv" ]; then
+    source .venv/bin/activate
+fi
 
 echo "🚀 Loading TradingAgents Environment..."
 echo "======================================"
@@ -75,8 +84,17 @@ for provider in "${PROVIDERS[@]}"; do
     echo "🔄 Starting analysis with $provider provider..."
     echo "================================================"
     
-    # Run the analysis with the current provider
-    uv run python main.py --tickers "${TICKERS[@]}" -p "$provider" --output-dir "$OUTPUT_DIR"
+    # Try different methods to run the analysis
+    if command -v uv &> /dev/null; then
+        echo "Using uv command..."
+        uv run python main.py --tickers "${TICKERS[@]}" -p "$provider" --output-dir "$OUTPUT_DIR"
+    elif [ -f ".venv/bin/python" ]; then
+        echo "Using virtual environment Python..."
+        .venv/bin/python main.py --tickers "${TICKERS[@]}" -p "$provider" --output-dir "$OUTPUT_DIR"
+    else
+        echo "Using system Python..."
+        python main.py --tickers "${TICKERS[@]}" -p "$provider" --output-dir "$OUTPUT_DIR"
+    fi
     
     echo ""
     echo "✅ Completed analysis with $provider provider"
