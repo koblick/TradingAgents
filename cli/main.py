@@ -340,9 +340,9 @@ def update_display(layout, spinner_text=None):
 
     # Add a footer to indicate if messages were truncated
     if len(all_messages) > max_messages:
-        messages_table.footer = (
-            f"[dim]Showing last {max_messages} of {len(all_messages)} messages[/dim]"
-        )
+        footer_text = f"[dim]Showing last {max_messages} of {len(all_messages)} messages[/dim]"
+    else:
+        footer_text = ""
 
     layout["messages"].update(
         Panel(
