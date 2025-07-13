@@ -71,7 +71,7 @@ OUTPUT_DIR="$BASE_OUTPUT_DIR$CURRENT_DATE/"
 mkdir -p "$OUTPUT_DIR"
 
 # Define providers array
-PROVIDERS=("deepseek" "openai")
+PROVIDERS=("openai" "deepseek")
 
 echo "📊 Analyzing the following stocks: ${TICKERS[*]}"
 echo "📁 Base output directory: $BASE_OUTPUT_DIR"
@@ -87,12 +87,15 @@ for provider in "${PROVIDERS[@]}"; do
     # Try different methods to run the analysis
     if command -v uv &> /dev/null; then
         echo "Using uv command..."
+        echo "uv run python main.py --tickers "${TICKERS[@]}" -p "$provider" --output-dir "$OUTPUT_DIR" --max-workers 5"
         uv run python main.py --tickers "${TICKERS[@]}" -p "$provider" --output-dir "$OUTPUT_DIR"
     elif [ -f ".venv/bin/python" ]; then
         echo "Using virtual environment Python..."
+        echo ".venv/bin/python main.py --tickers "${TICKERS[@]}" -p "$provider" --output-dir "$OUTPUT_DIR" --max-workers 5"
         .venv/bin/python main.py --tickers "${TICKERS[@]}" -p "$provider" --output-dir "$OUTPUT_DIR"
     else
         echo "Using system Python..."
+        echo "python main.py --tickers "${TICKERS[@]}" -p "$provider" --output-dir "$OUTPUT_DIR" --max-workers 5"
         python main.py --tickers "${TICKERS[@]}" -p "$provider" --output-dir "$OUTPUT_DIR"
     fi
     
@@ -100,19 +103,6 @@ for provider in "${PROVIDERS[@]}"; do
     echo "✅ Completed analysis with $provider provider"
     echo "=============================================="
     echo ""
-done
-
-# Copy detailed JSON logs to output directory
-echo "📋 Copying detailed JSON logs to output directory..."
-for ticker in "${TICKERS[@]}"; do
-    # Check if the eval_results directory exists for this ticker
-    if [ -d "eval_results/$ticker/TradingAgentsStrategy_logs/" ]; then
-        # Copy all JSON files for this ticker to the output directory
-        cp eval_results/$ticker/TradingAgentsStrategy_logs/*.json "$OUTPUT_DIR" 2>/dev/null || true
-        echo "   ✅ Copied JSON logs for $ticker"
-    else
-        echo "   ⚠️  No JSON logs found for $ticker"
-    fi
 done
 
 echo ""
