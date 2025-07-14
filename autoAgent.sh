@@ -107,37 +107,37 @@ run_ticker_analysis() {
     echo "========================================================"
 }
 
-# Loop through each provider
+# Array to store all background process PIDs
+declare -a all_pids=()
+
+echo "🔄 Starting all analyses in parallel..."
+echo "======================================"
+
+# Start analysis for each ticker and provider combination in parallel
 for provider in "${PROVIDERS[@]}"; do
-    echo "🔄 Starting analysis with $provider provider..."
-    echo "================================================"
-    
-    # Array to store background process PIDs
-    declare -a pids=()
-    
-    # Start analysis for each ticker in parallel
     for ticker in "${TICKERS[@]}"; do
         run_ticker_analysis "$ticker" "$provider" "$OUTPUT_DIR" &
-        pids+=($!)
-        echo "🚀 Started background process for $ticker (PID: $!)"
+        all_pids+=($!)
+        echo "🚀 Started background process for $ticker with $provider (PID: $!)"
     done
-    
-    echo ""
-    echo "⏳ Waiting for all $provider analyses to complete..."
-    echo "Running processes: ${pids[*]}"
-    echo ""
-    
-    # Wait for all background processes to complete
-    for pid in "${pids[@]}"; do
-        wait $pid
-        echo "✅ Process $pid completed"
-    done
-    
-    echo ""
-    echo "✅ Completed all analyses with $provider provider"
-    echo "=============================================="
-    echo ""
 done
+
+echo ""
+echo "⏳ Waiting for all analyses to complete..."
+echo "Running processes: ${all_pids[*]}"
+echo "Total processes: ${#all_pids[@]}"
+echo ""
+
+# Wait for all background processes to complete
+for pid in "${all_pids[@]}"; do
+    wait $pid
+    echo "✅ Process $pid completed"
+done
+
+echo ""
+echo "✅ Completed all analyses!"
+echo "========================="
+echo ""
 
 echo ""
 echo "🎉 All provider analyses completed!"
