@@ -77,30 +77,64 @@ echo "📊 Analyzing the following stocks: ${TICKERS[*]}"
 echo "📁 Base output directory: $BASE_OUTPUT_DIR"
 echo "📅 Date-specific directory: $OUTPUT_DIR"
 echo "🤖 Providers: ${PROVIDERS[*]}"
+echo "⚡ Running tickers in parallel for faster processing!"
 echo ""
+
+# Function to run analysis for a single ticker
+run_ticker_analysis() {
+    local ticker=$1
+    local provider=$2
+    local output_dir=$3
+    
+    echo "🔄 Starting analysis for $ticker with $provider provider..."
+    echo "========================================================"
+    
+    # Create ticker-specific output directory
+    local ticker_output_dir="$output_dir${ticker}_${provider}/"
+    mkdir -p "$ticker_output_dir"
+    
+    # Try different methods to run the analysis
+    if command -v uv &> /dev/null; then
+        echo "Using uv command for $ticker..."
+        uv run python main.py --tickers "$ticker" -p "$provider" --output-dir "$ticker_output_dir" > "$ticker_output_dir/console_output.log" 2>&1
+    else
+        echo "Using system Python for $ticker..."
+        python main.py --tickers "$ticker" -p "$provider" --output-dir "$ticker_output_dir" > "$ticker_output_dir/console_output.log" 2>&1
+    fi
+    
+    echo "✅ Completed analysis for $ticker with $provider provider"
+    echo "📁 Results saved in: $ticker_output_dir"
+    echo "========================================================"
+}
 
 # Loop through each provider
 for provider in "${PROVIDERS[@]}"; do
     echo "🔄 Starting analysis with $provider provider..."
     echo "================================================"
     
-    # Try different methods to run the analysis
-    if command -v uv &> /dev/null; then
-        echo "Using uv command..."
-        echo "uv run python main.py --tickers "${TICKERS[@]}" -p "$provider" --output-dir "$OUTPUT_DIR" --max-workers 5"
-        uv run python main.py --tickers "${TICKERS[@]}" -p "$provider" --output-dir "$OUTPUT_DIR"
-    elif [ -f ".venv/bin/python" ]; then
-        echo "Using virtual environment Python..."
-        echo ".venv/bin/python main.py --tickers "${TICKERS[@]}" -p "$provider" --output-dir "$OUTPUT_DIR" --max-workers 5"
-        .venv/bin/python main.py --tickers "${TICKERS[@]}" -p "$provider" --output-dir "$OUTPUT_DIR"
-    else
-        echo "Using system Python..."
-        echo "python main.py --tickers "${TICKERS[@]}" -p "$provider" --output-dir "$OUTPUT_DIR" --max-workers 5"
-        python main.py --tickers "${TICKERS[@]}" -p "$provider" --output-dir "$OUTPUT_DIR"
-    fi
+    # Array to store background process PIDs
+    declare -a pids=()
+    
+    # Start analysis for each ticker in parallel
+    for ticker in "${TICKERS[@]}"; do
+        run_ticker_analysis "$ticker" "$provider" "$OUTPUT_DIR" &
+        pids+=($!)
+        echo "🚀 Started background process for $ticker (PID: $!)"
+    done
     
     echo ""
-    echo "✅ Completed analysis with $provider provider"
+    echo "⏳ Waiting for all $provider analyses to complete..."
+    echo "Running processes: ${pids[*]}"
+    echo ""
+    
+    # Wait for all background processes to complete
+    for pid in "${pids[@]}"; do
+        wait $pid
+        echo "✅ Process $pid completed"
+    done
+    
+    echo ""
+    echo "✅ Completed all analyses with $provider provider"
     echo "=============================================="
     echo ""
 done
@@ -109,5 +143,6 @@ echo ""
 echo "🎉 All provider analyses completed!"
 echo "📁 Results saved in: $OUTPUT_DIR"
 echo "📄 Files include:"
-echo "   - trading_analysis_{date}_{provider}.txt (console output)"
-echo "   - full_states_log_{date}.json (detailed analysis logs)"
+echo "   - {ticker}_{provider}/trading_analysis_{date}_{provider}.txt (console output)"
+echo "   - {ticker}_{provider}/structured_report_{ticker}_{date}_{provider}.md (structured reports)"
+echo "   - {ticker}_{provider}/console_output.log (detailed logs)"
