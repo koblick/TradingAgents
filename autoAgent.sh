@@ -90,16 +90,16 @@ run_ticker_analysis() {
     echo "========================================================"
     
     # Create ticker-specific output directory
-    local ticker_output_dir="$output_dir${ticker}_${provider}/"
+    local ticker_output_dir="$output_dir${ticker}/"
     mkdir -p "$ticker_output_dir"
     
     # Try different methods to run the analysis
     if command -v uv &> /dev/null; then
         echo "Using uv command for $ticker..."
-        uv run python main.py --tickers "$ticker" -p "$provider" --output-dir "$ticker_output_dir" > "$ticker_output_dir/console_output.log" 2>&1
+        uv run python main.py --tickers "$ticker" -p "$provider" --output-dir "$ticker_output_dir"
     else
         echo "Using system Python for $ticker..."
-        python main.py --tickers "$ticker" -p "$provider" --output-dir "$ticker_output_dir" > "$ticker_output_dir/console_output.log" 2>&1
+        python main.py --tickers "$ticker" -p "$provider" --output-dir "$ticker_output_dir"
     fi
     
     echo "✅ Completed analysis for $ticker with $provider provider"
@@ -143,6 +143,5 @@ echo ""
 echo "🎉 All provider analyses completed!"
 echo "📁 Results saved in: $OUTPUT_DIR"
 echo "📄 Files include:"
-echo "   - {ticker}_{provider}/trading_analysis_{date}_{provider}.txt (console output)"
-echo "   - {ticker}_{provider}/structured_report_{ticker}_{date}_{provider}.md (structured reports)"
-echo "   - {ticker}_{provider}/console_output.log (detailed logs)"
+echo "   - {ticker}/trading_analysis_{date}_{provider}.txt (console output)"
+echo "   - {ticker}/structured_report_{ticker}_{date}_{provider}.md (structured reports)"
