@@ -56,7 +56,7 @@ echo "=================================="
 echo ""
 
 # Define ticker symbols array
-TICKERS=("BA" "AAPL" "GOOGL" "AMZN" "CVX")
+TICKERS=("BA" "AAPL" "GOOGL" "AMZN" "CVX" "NVDA" "PLTR")
 
 # Define base output directory
 BASE_OUTPUT_DIR="/Users/koblick/Library/Mobile Documents/com~apple~CloudDocs/Coorbital/StockAnalysis/"
