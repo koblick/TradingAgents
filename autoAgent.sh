@@ -62,7 +62,7 @@ TICKERS=("BA" "AAPL" "GOOGL" "AMZN" "CVX" "NVDA" "PLTR")
 BASE_OUTPUT_DIR="/Users/koblick/Library/Mobile Documents/com~apple~CloudDocs/Coorbital/StockAnalysis/"
 
 # Get current date in YYYY-MM-DD format
-CURRENT_DATE=$(date +"%Y-%m-%d")
+CURRENT_DATE=$(date +"%Y-%m-%d %H:%M:%S")
 
 # Create date-specific output directory
 OUTPUT_DIR="$BASE_OUTPUT_DIR$CURRENT_DATE/"
