@@ -56,13 +56,13 @@ echo "=================================="
 echo ""
 
 # Define ticker symbols array
-TICKERS=("BA" "AAPL" "GOOGL" "AMZN" "CVX" "NVDA" "PLTR")
+TICKERS=("BA" "AAPL" "GOOGL" "AMZN" "CVX" "NVDA" "PLTR" "UNH")
 
 # Define base output directory
 BASE_OUTPUT_DIR="/Users/koblick/Library/Mobile Documents/com~apple~CloudDocs/Coorbital/StockAnalysis/"
 
 # Get current date in YYYY-MM-DD format
-CURRENT_DATE=$(date +"%Y-%m-%d %H:%M:%S")
+CURRENT_DATE=$(date +"%Y-%m-%d_%H-%M-%S")
 
 # Create date-specific output directory
 OUTPUT_DIR="$BASE_OUTPUT_DIR$CURRENT_DATE/"
