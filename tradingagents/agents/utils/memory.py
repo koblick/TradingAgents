@@ -5,16 +5,21 @@ from openai import OpenAI
 
 class FinancialSituationMemory:
     def __init__(self, name, config):
+        self.config = config
         if config["backend_url"] == "http://localhost:11434/v1":
             self.embedding = "nomic-embed-text"
+            self.is_ollama = True
+            # Initialize OpenAI client with Ollama endpoint
+            self.client = OpenAI(base_url=config["backend_url"], api_key="not-required")
         else:
             self.embedding = "text-embedding-3-small"
-        self.client = OpenAI()
+            self.is_ollama = False
+            self.client = OpenAI()
         self.chroma_client = chromadb.Client(Settings(allow_reset=True))
         self.situation_collection = self.chroma_client.create_collection(name=name)
 
     def get_embedding(self, text):
-        """Get OpenAI embedding for a text"""
+        """Get embedding for a text from either OpenAI or Ollama"""
         
         response = self.client.embeddings.create(
             model=self.embedding, input=text
@@ -45,7 +50,7 @@ class FinancialSituationMemory:
         )
 
     def get_memories(self, current_situation, n_matches=1):
-        """Find matching recommendations using OpenAI embeddings"""
+        """Find matching recommendations using embeddings (OpenAI or Ollama)"""
         query_embedding = self.get_embedding(current_situation)
 
         results = self.situation_collection.query(

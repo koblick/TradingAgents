@@ -9,3 +9,6 @@ eval_data/
 .env
 
 results/
+
+.vscode
+

@@ -193,8 +193,8 @@ def main():
                        help='Stock symbols to analyze (e.g., NVDA BA AAPL)')
     parser.add_argument('--date', '-d', default=None,
                        help='Date to analyze (YYYY-MM-DD format). Defaults to today.')
-    parser.add_argument('--provider', '-p', choices=['openai', 'deepseek'], default='openai',
-                       help='LLM provider to use: openai or deepseek')
+    parser.add_argument('--provider', '-p', choices=['openai', 'deepseek', 'ollama'], default='openai',
+                       help='LLM provider to use: openai, deepseek, or ollama')
     parser.add_argument('--output-dir', '-o', default='.',
                        help='Directory to save output files (default: current directory)')
     
@@ -211,6 +211,10 @@ def main():
     elif args.provider == "deepseek":
         config["deep_think_llm"] = "deepseek-reasoner"
         config["quick_think_llm"] = "deepseek-coder"
+    elif args.provider == "ollama":
+        # Use the Ollama configuration from default_config
+        config["deep_think_llm"] = config["ollama_deep_model"]
+        config["quick_think_llm"] = config["ollama_quick_model"]
     
     config["max_debate_rounds"] = 1             # Increase debate rounds
     config["online_tools"] = True               # Enable online tools
