@@ -56,7 +56,7 @@ echo "=================================="
 echo ""
 
 # Define ticker symbols array
-TICKERS=("BA" "AAPL" "GOOGL" "AMZN" "CVX" "NVDA" "UNH" "TSM" "ASML")
+TICKERS=("AAPL" "GOOGL" "AMZN" "CVX" "NVDA" "UNH" "TSM" "SNOW" "IAU" "SPY")
 
 # Define base output directory
 BASE_OUTPUT_DIR="/Users/koblick/Library/Mobile Documents/com~apple~CloudDocs/Coorbital/StockAnalysis/"
@@ -71,7 +71,9 @@ OUTPUT_DIR="$BASE_OUTPUT_DIR$CURRENT_DATE/"
 mkdir -p "$OUTPUT_DIR"
 
 # Define providers array
-PROVIDERS=("openai" "deepseek")
+# PROVIDERS=("openai" "deepseek")
+PROVIDERS=("deepseek")
+
 
 echo "📊 Analyzing the following stocks: ${TICKERS[*]}"
 echo "📁 Base output directory: $BASE_OUTPUT_DIR"
