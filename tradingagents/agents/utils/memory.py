@@ -6,11 +6,15 @@ from openai import OpenAI
 class FinancialSituationMemory:
     def __init__(self, name, config):
         self.config = config
-        if config["backend_url"] == "http://localhost:11434/v1":
+        # Check if we're using Ollama provider
+        if (config.get("llm_provider", "").lower() == "ollama" or 
+            config.get("backend_url") == "http://localhost:11434/v1" or
+            config.get("ollama_base_url")):
             self.embedding = "nomic-embed-text"
             self.is_ollama = True
-            # Initialize OpenAI client with Ollama endpoint
-            self.client = OpenAI(base_url=config["backend_url"], api_key="not-required")
+            # Use ollama_base_url if available, otherwise fallback to backend_url
+            ollama_url = config.get("ollama_base_url", config.get("backend_url", "http://localhost:11434/v1"))
+            self.client = OpenAI(base_url=ollama_url, api_key="not-required")
         else:
             self.embedding = "text-embedding-3-small"
             self.is_ollama = False

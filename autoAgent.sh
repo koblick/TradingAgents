@@ -59,7 +59,7 @@ echo ""
 TICKERS=("BA" "AAPL" "GOOGL" "AMZN" "CVX" "NVDA" "UNH" "TSM" "ASML")
 
 # Define base output directory
-BASE_OUTPUT_DIR="/Users/koblick/Library/Mobile Documents/com~apple~CloudDocs/Coorbital/StockAnalysis/"
+BASE_OUTPUT_DIR="./results/"
 
 # Get current date in YYYY-MM-DD format
 CURRENT_DATE=$(date +"%Y-%m-%d_%H-%M-%S")
@@ -71,13 +71,13 @@ OUTPUT_DIR="$BASE_OUTPUT_DIR$CURRENT_DATE/"
 mkdir -p "$OUTPUT_DIR"
 
 # Define providers array
-PROVIDERS=("openai" "deepseek")
+PROVIDERS=('ollama')
 
 echo "📊 Analyzing the following stocks: ${TICKERS[*]}"
 echo "📁 Base output directory: $BASE_OUTPUT_DIR"
 echo "📅 Date-specific directory: $OUTPUT_DIR"
 echo "🤖 Providers: ${PROVIDERS[*]}"
-echo "⚡ Running tickers in parallel for faster processing!"
+echo "🔄 Running all analyses sequentially..."
 echo ""
 
 # Function to run analysis for a single ticker
@@ -93,54 +93,57 @@ run_ticker_analysis() {
     local ticker_output_dir="$output_dir${ticker}/"
     mkdir -p "$ticker_output_dir"
     
-    # Try different methods to run the analysis
+    # Create a detailed log file for this ticker
+    local log_file="$ticker_output_dir/full_analysis_log.txt"
+    
+    echo "📝 Full analysis log will be saved to: $log_file"
+    
+    # Try different methods to run the analysis with full output capture
     if command -v uv &> /dev/null; then
         echo "Using uv command for $ticker..."
-        uv run python main.py --tickers "$ticker" -p "$provider" --output-dir "$ticker_output_dir"
+        echo "=== ANALYSIS START: $(date) ===" >> "$log_file"
+        uv run python main.py --tickers "$ticker" -p "$provider" --output-dir "$ticker_output_dir" 2>&1 | tee -a "$log_file"
+        echo "=== ANALYSIS END: $(date) ===" >> "$log_file"
     else
         echo "Using system Python for $ticker..."
-        python main.py --tickers "$ticker" -p "$provider" --output-dir "$ticker_output_dir"
+        echo "=== ANALYSIS START: $(date) ===" >> "$log_file"
+        python main.py --tickers "$ticker" -p "$provider" --output-dir "$ticker_output_dir" 2>&1 | tee -a "$log_file"
+        echo "=== ANALYSIS END: $(date) ===" >> "$log_file"
     fi
     
     echo "✅ Completed analysis for $ticker with $provider provider"
     echo "📁 Results saved in: $ticker_output_dir"
+    echo "📝 Full log saved in: $log_file"
     echo "========================================================"
 }
 
-# Array to store all background process PIDs
-declare -a all_pids=()
+# Run all analyses sequentially
+echo "🔄 Starting sequential analyses..."
+echo "================================="
 
-echo "🔄 Starting all analyses in parallel..."
-echo "======================================"
-
-# Start analysis for each ticker and provider combination in parallel
 for provider in "${PROVIDERS[@]}"; do
+    echo "🤖 Starting $provider provider analysis..."
+    echo "----------------------------------------"
+    
     for ticker in "${TICKERS[@]}"; do
-        run_ticker_analysis "$ticker" "$provider" "$OUTPUT_DIR" &
-        all_pids+=($!)
-        echo "🚀 Started background process for $ticker with $provider (PID: $!)"
+        echo "📊 Processing $ticker with $provider..."
+        run_ticker_analysis "$ticker" "$provider" "$OUTPUT_DIR"
+        
+        if [ $? -eq 0 ]; then
+            echo "✅ Completed $ticker with $provider"
+        else
+            echo "❌ Failed $ticker with $provider"
+        fi
+        echo ""
     done
+    
+    echo "✅ Completed all tickers for $provider provider"
+    echo "=============================================="
+    echo ""
 done
 
 echo ""
-echo "⏳ Waiting for all analyses to complete..."
-echo "Running processes: ${all_pids[*]}"
-echo "Total processes: ${#all_pids[@]}"
-echo ""
-
-# Wait for all background processes to complete
-for pid in "${all_pids[@]}"; do
-    wait $pid
-    echo "✅ Process $pid completed"
-done
-
-echo ""
-echo "✅ Completed all analyses!"
-echo "========================="
-echo ""
-
-echo ""
-echo "🎉 All provider analyses completed!"
+echo "🎉 All analyses completed successfully!"
 echo "📁 Results saved in: $OUTPUT_DIR"
 echo "📄 Files include:"
 echo "   - {ticker}/trading_analysis_{date}_{provider}.txt (console output)"

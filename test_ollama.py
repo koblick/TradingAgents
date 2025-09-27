@@ -44,8 +44,8 @@ def test_ollama_connection():
         print("\n✅ TradingAgentsGraph initialized successfully with Ollama!")
         
         # Test a simple analysis
-        print("\n🧪 Running test analysis on AAPL...")
-        final_state, decision = ta.propagate("AAPL", "2025-08-30")
+        print("\n🧪 Running test analysis on TSM...")
+        final_state, decision = ta.propagate("TSM", "2025-08-30")
         
         print(f"\n📊 Analysis Results:")
         print(f"Decision: {decision}")

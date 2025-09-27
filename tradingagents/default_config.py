@@ -21,8 +21,8 @@ DEFAULT_CONFIG = {
     "backend_url": "https://api.openai.com/v1",
     # Ollama settings
     "ollama_base_url": os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1"),
-    "ollama_deep_model": os.getenv("OLLAMA_DEEP_MODEL", "gpt-oss:120b"),
-    "ollama_quick_model": os.getenv("OLLAMA_QUICK_MODEL", "gpt-oss:20b"),
+    "ollama_deep_model": os.getenv("OLLAMA_DEEP_MODEL", "gpt-oss:latest"),
+    "ollama_quick_model": os.getenv("OLLAMA_QUICK_MODEL", "gpt-oss:latest"),
     # Debate and discussion settings
     "max_debate_rounds": 3,
     "max_risk_discuss_rounds": 3,
