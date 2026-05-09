@@ -4,6 +4,8 @@ from openai import OpenAI
 
 
 class FinancialSituationMemory:
+    MAX_EMBEDDING_CHARS = 24000
+
     def __init__(self, name, config):
         if config["backend_url"] == "http://localhost:11434/v1":
             self.embedding = "nomic-embed-text"
@@ -13,11 +15,22 @@ class FinancialSituationMemory:
         self.chroma_client = chromadb.Client(Settings(allow_reset=True))
         self.situation_collection = self.chroma_client.create_collection(name=name)
 
+    @classmethod
+    def _prepare_embedding_text(cls, text):
+        if len(text) <= cls.MAX_EMBEDDING_CHARS:
+            return text
+
+        marker = "\n\n[...truncated for embedding...]\n\n"
+        available_chars = cls.MAX_EMBEDDING_CHARS - len(marker)
+        head_chars = available_chars // 2
+        tail_chars = available_chars - head_chars
+        return text[:head_chars] + marker + text[-tail_chars:]
+
     def get_embedding(self, text):
         """Get OpenAI embedding for a text"""
         
         response = self.client.embeddings.create(
-            model=self.embedding, input=text
+            model=self.embedding, input=self._prepare_embedding_text(text)
         )
         return response.data[0].embedding
 
@@ -46,6 +59,9 @@ class FinancialSituationMemory:
 
     def get_memories(self, current_situation, n_matches=1):
         """Find matching recommendations using OpenAI embeddings"""
+        if self.situation_collection.count() == 0:
+            return []
+
         query_embedding = self.get_embedding(current_situation)
 
         results = self.situation_collection.query(
