@@ -210,13 +210,10 @@ def main():
         config["quick_think_llm"] = "gpt-4o-mini"
     elif args.provider == "deepseek":
         config["deep_think_llm"] = "deepseek-reasoner"
-        config["quick_think_llm"] = "deepseek-coder"
+        config["quick_think_llm"] = "deepseek-chat"
     
     config["max_debate_rounds"] = 1             # Increase debate rounds
     config["online_tools"] = True               # Enable online tools
-
-    # Initialize with custom config
-    ta = TradingAgentsGraph(debug=False, config=config)
 
     # Get date (today if not specified)
     if args.date:
@@ -226,6 +223,12 @@ def main():
 
     # Create output directory if it doesn't exist
     os.makedirs(args.output_dir, exist_ok=True)
+    config["progress_log_path"] = os.path.join(
+        args.output_dir, f"progress_{analysis_date}_{args.provider}.jsonl"
+    )
+
+    # Initialize with custom config
+    ta = TradingAgentsGraph(debug=False, config=config)
     
     # Create output filename with full path
     output_filename = os.path.join(args.output_dir, f"trading_analysis_{analysis_date}_{args.provider}.txt")

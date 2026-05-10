@@ -7,11 +7,12 @@ class FinancialSituationMemory:
     MAX_EMBEDDING_CHARS = 24000
 
     def __init__(self, name, config):
+        self.config = config
         if config["backend_url"] == "http://localhost:11434/v1":
             self.embedding = "nomic-embed-text"
         else:
             self.embedding = "text-embedding-3-small"
-        self.client = OpenAI()
+        self.client = OpenAI(timeout=config.get("openai_tool_timeout_seconds"))
         self.chroma_client = chromadb.Client(Settings(allow_reset=True))
         self.situation_collection = self.chroma_client.create_collection(name=name)
 

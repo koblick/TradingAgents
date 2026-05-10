@@ -14,8 +14,11 @@ from tqdm import tqdm
 import yfinance as yf
 from openai import OpenAI
 from .config import get_config, set_config, DATA_DIR
+from .research_cache import load_text_cache, store_text_cache
 
 TEMPERATURE = 0.3
+OPENAI_SEARCH_MODEL = "gpt-4o-mini"
+OPENAI_SEARCH_CACHE_NAMESPACE = "openai_search"
 
 def get_finnhub_news(
     ticker: Annotated[
@@ -705,11 +708,25 @@ def get_YFin_data(
 
 def get_stock_news_openai(ticker, curr_date):
     config = get_config()
-    client = OpenAI(api_key=config["OPENAI_API_KEY"])
+    cache_key = {
+        "tool": "get_stock_news_openai",
+        "ticker": ticker,
+        "curr_date": curr_date,
+        "model": OPENAI_SEARCH_MODEL,
+        "prompt_version": "v1",
+    }
+    cached_result = load_text_cache(config, OPENAI_SEARCH_CACHE_NAMESPACE, cache_key)
+    if cached_result is not None:
+        return cached_result
+
+    client = OpenAI(
+        api_key=config["OPENAI_API_KEY"],
+        timeout=config.get("openai_tool_timeout_seconds"),
+    )
     
 
     response = client.responses.create(
-        model= 'gpt-4o-mini', # TODO: change to config["quick_think_llm"],
+        model=OPENAI_SEARCH_MODEL, # TODO: change to config["quick_think_llm"],
         input=[
             {
                 "role": "system",
@@ -736,15 +753,27 @@ def get_stock_news_openai(ticker, curr_date):
         store=True,
     )
 
-    return response.output[1].content[0].text
+    result = response.output[1].content[0].text
+    store_text_cache(config, OPENAI_SEARCH_CACHE_NAMESPACE, cache_key, result)
+    return result
 
 
 def get_global_news_openai(curr_date):
     config = get_config()
-    client = OpenAI()
+    cache_key = {
+        "tool": "get_global_news_openai",
+        "curr_date": curr_date,
+        "model": OPENAI_SEARCH_MODEL,
+        "prompt_version": "v1",
+    }
+    cached_result = load_text_cache(config, OPENAI_SEARCH_CACHE_NAMESPACE, cache_key)
+    if cached_result is not None:
+        return cached_result
+
+    client = OpenAI(timeout=config.get("openai_tool_timeout_seconds"))
 
     response = client.responses.create(
-        model= 'gpt-4o-mini', # TODO: change to config["quick_think_llm"],
+        model=OPENAI_SEARCH_MODEL, # TODO: change to config["quick_think_llm"],
         input=[
             {
                 "role": "system",
@@ -771,15 +800,28 @@ def get_global_news_openai(curr_date):
         store=True,
     )
 
-    return response.output[1].content[0].text
+    result = response.output[1].content[0].text
+    store_text_cache(config, OPENAI_SEARCH_CACHE_NAMESPACE, cache_key, result)
+    return result
 
 
 def get_fundamentals_openai(ticker, curr_date):
     config = get_config()
-    client = OpenAI()
+    cache_key = {
+        "tool": "get_fundamentals_openai",
+        "ticker": ticker,
+        "curr_date": curr_date,
+        "model": OPENAI_SEARCH_MODEL,
+        "prompt_version": "v1",
+    }
+    cached_result = load_text_cache(config, OPENAI_SEARCH_CACHE_NAMESPACE, cache_key)
+    if cached_result is not None:
+        return cached_result
+
+    client = OpenAI(timeout=config.get("openai_tool_timeout_seconds"))
 
     response = client.responses.create(
-        model= 'gpt-4o-mini', # TODO: change to config["quick_think_llm"],
+        model=OPENAI_SEARCH_MODEL, # TODO: change to config["quick_think_llm"],
         input=[
             {
                 "role": "system",
@@ -806,4 +848,6 @@ def get_fundamentals_openai(ticker, curr_date):
         store=True,
     )
 
-    return response.output[1].content[0].text
+    result = response.output[1].content[0].text
+    store_text_cache(config, OPENAI_SEARCH_CACHE_NAMESPACE, cache_key, result)
+    return result

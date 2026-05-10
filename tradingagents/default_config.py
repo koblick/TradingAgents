@@ -23,6 +23,13 @@ DEFAULT_CONFIG = {
     "max_debate_rounds": 3,
     "max_risk_discuss_rounds": 3,
     "max_recur_limit": 100,
+    "llm_max_retries": 3,
+    "llm_retry_backoff_seconds": 5,
+    "llm_timeout_seconds": 300,
+    "openai_tool_timeout_seconds": 180,
+    "enable_progress_logging": True,
+    "progress_log_path": None,
+    "research_cache_ttl_seconds": 3600,
     # Tool settings
     "online_tools": True,
 }
