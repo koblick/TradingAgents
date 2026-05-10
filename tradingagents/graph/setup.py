@@ -1,14 +1,12 @@
 # TradingAgents/graph/setup.py
 
 import time
-from typing import Dict, Any
-from langchain_openai import ChatOpenAI
-from langgraph.graph import END, StateGraph, START
+from typing import Any, Dict
+from langgraph.graph import END, START, StateGraph
 from langgraph.prebuilt import ToolNode
 
 from tradingagents.agents import *
 from tradingagents.agents.utils.agent_states import AgentState
-from tradingagents.agents.utils.agent_utils import Toolkit
 from tradingagents.progress import ProgressLogger
 
 from .conditional_logic import ConditionalLogic
@@ -19,28 +17,16 @@ class GraphSetup:
 
     def __init__(
         self,
-        quick_thinking_llm: ChatOpenAI,
-        deep_thinking_llm: ChatOpenAI,
-        toolkit: Toolkit,
+        quick_thinking_llm: Any,
+        deep_thinking_llm: Any,
         tool_nodes: Dict[str, ToolNode],
-        bull_memory,
-        bear_memory,
-        trader_memory,
-        invest_judge_memory,
-        risk_manager_memory,
         conditional_logic: ConditionalLogic,
         progress_logger: ProgressLogger = None,
     ):
         """Initialize with required components."""
         self.quick_thinking_llm = quick_thinking_llm
         self.deep_thinking_llm = deep_thinking_llm
-        self.toolkit = toolkit
         self.tool_nodes = tool_nodes
-        self.bull_memory = bull_memory
-        self.bear_memory = bear_memory
-        self.trader_memory = trader_memory
-        self.invest_judge_memory = invest_judge_memory
-        self.risk_manager_memory = risk_manager_memory
         self.conditional_logic = conditional_logic
         self.progress_logger = progress_logger or ProgressLogger(None)
 
@@ -102,51 +88,43 @@ class GraphSetup:
 
         if "market" in selected_analysts:
             analyst_nodes["market"] = create_market_analyst(
-                self.quick_thinking_llm, self.toolkit
+                self.quick_thinking_llm
             )
             delete_nodes["market"] = create_msg_delete()
             tool_nodes["market"] = self.tool_nodes["market"]
 
         if "social" in selected_analysts:
             analyst_nodes["social"] = create_social_media_analyst(
-                self.quick_thinking_llm, self.toolkit
+                self.quick_thinking_llm
             )
             delete_nodes["social"] = create_msg_delete()
             tool_nodes["social"] = self.tool_nodes["social"]
 
         if "news" in selected_analysts:
             analyst_nodes["news"] = create_news_analyst(
-                self.quick_thinking_llm, self.toolkit
+                self.quick_thinking_llm
             )
             delete_nodes["news"] = create_msg_delete()
             tool_nodes["news"] = self.tool_nodes["news"]
 
         if "fundamentals" in selected_analysts:
             analyst_nodes["fundamentals"] = create_fundamentals_analyst(
-                self.quick_thinking_llm, self.toolkit
+                self.quick_thinking_llm
             )
             delete_nodes["fundamentals"] = create_msg_delete()
             tool_nodes["fundamentals"] = self.tool_nodes["fundamentals"]
 
         # Create researcher and manager nodes
-        bull_researcher_node = create_bull_researcher(
-            self.quick_thinking_llm, self.bull_memory
-        )
-        bear_researcher_node = create_bear_researcher(
-            self.quick_thinking_llm, self.bear_memory
-        )
-        research_manager_node = create_research_manager(
-            self.deep_thinking_llm, self.invest_judge_memory
-        )
-        trader_node = create_trader(self.quick_thinking_llm, self.trader_memory)
+        bull_researcher_node = create_bull_researcher(self.quick_thinking_llm)
+        bear_researcher_node = create_bear_researcher(self.quick_thinking_llm)
+        research_manager_node = create_research_manager(self.deep_thinking_llm)
+        trader_node = create_trader(self.quick_thinking_llm)
 
         # Create risk analysis nodes
-        risky_analyst = create_risky_debator(self.quick_thinking_llm)
+        aggressive_analyst = create_aggressive_debator(self.quick_thinking_llm)
         neutral_analyst = create_neutral_debator(self.quick_thinking_llm)
-        safe_analyst = create_safe_debator(self.quick_thinking_llm)
-        risk_manager_node = create_risk_manager(
-            self.deep_thinking_llm, self.risk_manager_memory
-        )
+        conservative_analyst = create_conservative_debator(self.quick_thinking_llm)
+        portfolio_manager_node = create_portfolio_manager(self.deep_thinking_llm)
 
         # Create workflow
         workflow = StateGraph(AgentState)
@@ -158,7 +136,8 @@ class GraphSetup:
             workflow.add_node(
                 f"Msg Clear {analyst_type.capitalize()}",
                 self._wrap_node(
-                    f"Msg Clear {analyst_type.capitalize()}", delete_nodes[analyst_type]
+                    f"Msg Clear {analyst_type.capitalize()}",
+                    delete_nodes[analyst_type],
                 ),
             )
             workflow.add_node(
@@ -178,12 +157,21 @@ class GraphSetup:
             self._wrap_node("Research Manager", research_manager_node),
         )
         workflow.add_node("Trader", self._wrap_node("Trader", trader_node))
-        workflow.add_node("Risky Analyst", self._wrap_node("Risky Analyst", risky_analyst))
+        workflow.add_node(
+            "Aggressive Analyst",
+            self._wrap_node("Aggressive Analyst", aggressive_analyst),
+        )
         workflow.add_node(
             "Neutral Analyst", self._wrap_node("Neutral Analyst", neutral_analyst)
         )
-        workflow.add_node("Safe Analyst", self._wrap_node("Safe Analyst", safe_analyst))
-        workflow.add_node("Risk Judge", self._wrap_node("Risk Judge", risk_manager_node))
+        workflow.add_node(
+            "Conservative Analyst",
+            self._wrap_node("Conservative Analyst", conservative_analyst),
+        )
+        workflow.add_node(
+            "Portfolio Manager",
+            self._wrap_node("Portfolio Manager", portfolio_manager_node),
+        )
 
         # Define edges
         # Start with the first analyst
@@ -229,33 +217,32 @@ class GraphSetup:
             },
         )
         workflow.add_edge("Research Manager", "Trader")
-        workflow.add_edge("Trader", "Risky Analyst")
+        workflow.add_edge("Trader", "Aggressive Analyst")
         workflow.add_conditional_edges(
-            "Risky Analyst",
+            "Aggressive Analyst",
             self.conditional_logic.should_continue_risk_analysis,
             {
-                "Safe Analyst": "Safe Analyst",
-                "Risk Judge": "Risk Judge",
+                "Conservative Analyst": "Conservative Analyst",
+                "Portfolio Manager": "Portfolio Manager",
             },
         )
         workflow.add_conditional_edges(
-            "Safe Analyst",
+            "Conservative Analyst",
             self.conditional_logic.should_continue_risk_analysis,
             {
                 "Neutral Analyst": "Neutral Analyst",
-                "Risk Judge": "Risk Judge",
+                "Portfolio Manager": "Portfolio Manager",
             },
         )
         workflow.add_conditional_edges(
             "Neutral Analyst",
             self.conditional_logic.should_continue_risk_analysis,
             {
-                "Risky Analyst": "Risky Analyst",
-                "Risk Judge": "Risk Judge",
+                "Aggressive Analyst": "Aggressive Analyst",
+                "Portfolio Manager": "Portfolio Manager",
             },
         )
 
-        workflow.add_edge("Risk Judge", END)
+        workflow.add_edge("Portfolio Manager", END)
 
-        # Compile and return
-        return workflow.compile()
+        return workflow

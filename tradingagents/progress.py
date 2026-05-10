@@ -20,6 +20,6 @@ class ProgressLogger:
             "event": event,
             **fields,
         }
-        with open(self.path, "a") as f:
+        with open(self.path, "a", encoding="utf-8") as f:
             f.write(json.dumps(payload, default=str) + "\n")
             f.flush()

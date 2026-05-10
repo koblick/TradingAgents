@@ -40,7 +40,7 @@ def load_text_cache(
     ttl_seconds = get_research_cache_ttl(config) if ttl_seconds is None else ttl_seconds
 
     try:
-        with open(path, "r") as f:
+        with open(path, "r", encoding="utf-8") as f:
             payload = json.load(f)
     except (OSError, json.JSONDecodeError):
         return None
@@ -68,5 +68,5 @@ def store_text_cache(
         "value": value,
     }
 
-    with open(path, "w") as f:
+    with open(path, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2)

@@ -1,10 +1,6 @@
-from typing import Annotated, Sequence
-from datetime import date, timedelta, datetime
-from typing_extensions import TypedDict, Optional
-from langchain_openai import ChatOpenAI
-from tradingagents.agents import *
-from langgraph.prebuilt import ToolNode
-from langgraph.graph import END, StateGraph, START, MessagesState
+from typing import Annotated
+from typing_extensions import TypedDict
+from langgraph.graph import MessagesState
 
 
 # Researcher team state
@@ -23,22 +19,22 @@ class InvestDebateState(TypedDict):
 
 # Risk management team state
 class RiskDebateState(TypedDict):
-    risky_history: Annotated[
-        str, "Risky Agent's Conversation history"
+    aggressive_history: Annotated[
+        str, "Aggressive Agent's Conversation history"
     ]  # Conversation history
-    safe_history: Annotated[
-        str, "Safe Agent's Conversation history"
+    conservative_history: Annotated[
+        str, "Conservative Agent's Conversation history"
     ]  # Conversation history
     neutral_history: Annotated[
         str, "Neutral Agent's Conversation history"
     ]  # Conversation history
     history: Annotated[str, "Conversation history"]  # Conversation history
     latest_speaker: Annotated[str, "Analyst that spoke last"]
-    current_risky_response: Annotated[
-        str, "Latest response by the risky analyst"
+    current_aggressive_response: Annotated[
+        str, "Latest response by the aggressive analyst"
     ]  # Last response
-    current_safe_response: Annotated[
-        str, "Latest response by the safe analyst"
+    current_conservative_response: Annotated[
+        str, "Latest response by the conservative analyst"
     ]  # Last response
     current_neutral_response: Annotated[
         str, "Latest response by the neutral analyst"
@@ -74,3 +70,4 @@ class AgentState(MessagesState):
         RiskDebateState, "Current state of the debate on evaluating risk"
     ]
     final_trade_decision: Annotated[str, "Final decision made by the Risk Analysts"]
+    past_context: Annotated[str, "Memory log context injected at run start (same-ticker decisions + cross-ticker lessons)"]

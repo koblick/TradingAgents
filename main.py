@@ -4,11 +4,14 @@ from datetime import datetime
 import argparse
 import sys
 import os
+from dotenv import find_dotenv, load_dotenv
+
+load_dotenv(find_dotenv(usecwd=True))
 
 class DualOutput:
     def __init__(self, filename):
         self.terminal = sys.stdout
-        self.file = open(filename, 'w')
+        self.file = open(filename, 'w', encoding='utf-8')
     
     def write(self, message):
         self.terminal.write(message)
@@ -83,7 +86,7 @@ def save_structured_report(final_state, ticker, analysis_date, provider, output_
     report_filename = f"structured_report_{ticker}_{analysis_date}_{provider}.md"
     report_path = os.path.join(output_dir, report_filename)
     
-    with open(report_path, 'w') as f:
+    with open(report_path, 'w', encoding='utf-8') as f:
         # Header
         f.write(f"# Trading Analysis Report\n\n")
         f.write(f"**Company:** {ticker}\n")
@@ -155,15 +158,15 @@ def save_structured_report(final_state, ticker, analysis_date, provider, output_
             risk_state = final_state["risk_debate_state"]
             
             # Aggressive (Risky) Analyst Analysis
-            if risk_state.get("risky_history"):
+            if risk_state.get("aggressive_history"):
                 f.write("### Aggressive Analyst\n\n")
-                f.write(f"{risk_state['risky_history']}\n\n")
+                f.write(f"{risk_state['aggressive_history']}\n\n")
                 f.write("---\n\n")
             
             # Conservative (Safe) Analyst Analysis
-            if risk_state.get("safe_history"):
+            if risk_state.get("conservative_history"):
                 f.write("### Conservative Analyst\n\n")
-                f.write(f"{risk_state['safe_history']}\n\n")
+                f.write(f"{risk_state['conservative_history']}\n\n")
                 f.write("---\n\n")
             
             # Neutral Analyst Analysis
@@ -193,8 +196,8 @@ def main():
                        help='Stock symbols to analyze (e.g., NVDA BA AAPL)')
     parser.add_argument('--date', '-d', default=None,
                        help='Date to analyze (YYYY-MM-DD format). Defaults to today.')
-    parser.add_argument('--provider', '-p', choices=['openai', 'deepseek'], default='openai',
-                       help='LLM provider to use: openai or deepseek')
+    parser.add_argument('--provider', '-p', choices=['openai', 'deepseek', 'openrouter'], default='openai',
+                       help='LLM provider to use: openai, deepseek, or openrouter')
     parser.add_argument('--output-dir', '-o', default='.',
                        help='Directory to save output files (default: current directory)')
     
@@ -206,11 +209,14 @@ def main():
     
     # Configure models based on provider
     if args.provider == "openai":
-        config["deep_think_llm"] = "o1"
-        config["quick_think_llm"] = "gpt-4o-mini"
+        config["deep_think_llm"] = "gpt-5.4"
+        config["quick_think_llm"] = "gpt-5.4-mini"
     elif args.provider == "deepseek":
         config["deep_think_llm"] = "deepseek-reasoner"
         config["quick_think_llm"] = "deepseek-chat"
+    elif args.provider == "openrouter":
+        config["deep_think_llm"] = os.getenv("OPENROUTER_DEEP_MODEL", config["deep_think_llm"])
+        config["quick_think_llm"] = os.getenv("OPENROUTER_QUICK_MODEL", config["quick_think_llm"])
     
     config["max_debate_rounds"] = 1             # Increase debate rounds
     config["online_tools"] = True               # Enable online tools
