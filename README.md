@@ -25,11 +25,14 @@
 
 ---
 
-# TradingAgents: Multi-Agents LLM Financial Trading Framework 
+# TradingAgents: Multi-Agents LLM Financial Trading Framework
 
-> 🎉 **TradingAgents** officially released! We have received numerous inquiries about the work, and we would like to express our thanks for the enthusiasm in our community.
->
-> So we decided to fully open-source the framework. Looking forward to building impactful projects with you!
+## News
+- [2026-04] **TradingAgents v0.2.4** released with structured-output agents (Research Manager, Trader, Portfolio Manager), LangGraph checkpoint resume, persistent decision log, DeepSeek/Qwen/GLM/Azure provider support, Docker, and a Windows UTF-8 encoding fix. See [CHANGELOG.md](CHANGELOG.md) for the full list.
+- [2026-03] **TradingAgents v0.2.3** released with multi-language support, GPT-5.4 family models, unified model catalog, backtesting date fidelity, and proxy support.
+- [2026-03] **TradingAgents v0.2.2** released with GPT-5.4/Gemini 3.1/Claude 4.6 model coverage, five-tier rating scale, OpenAI Responses API, Anthropic effort control, and cross-platform stability.
+- [2026-02] **TradingAgents v0.2.0** released with multi-provider LLM support (GPT-5.x, Gemini 3.x, Claude 4.x, Grok 4.x) and improved system architecture.
+- [2026-01] **Trading-R1** [Technical Report](https://arxiv.org/abs/2509.11420) released, with [Terminal](https://github.com/TauricResearch/Trading-R1) expected to land soon.
 
 <div align="center">
 <a href="https://www.star-history.com/#TauricResearch/TradingAgents&Date">
@@ -40,6 +43,10 @@
  </picture>
 </a>
 </div>
+
+> 🎉 **TradingAgents** officially released! We have received numerous inquiries about the work, and we would like to express our thanks for the enthusiasm in our community.
+>
+> So we decided to fully open-source the framework. Looking forward to building impactful projects with you!
 
 <div align="center">
 
@@ -107,30 +114,57 @@ conda create -n tradingagents python=3.13
 conda activate tradingagents
 ```
 
-Install dependencies:
+Install the package and its dependencies:
 ```bash
-pip install -r requirements.txt
+pip install .
+```
+
+### Docker
+
+Alternatively, run with Docker:
+```bash
+cp .env.example .env  # add your API keys
+docker compose run --rm tradingagents
+```
+
+For local models with Ollama:
+```bash
+docker compose --profile ollama run --rm tradingagents-ollama
 ```
 
 ### Required APIs
 
-You will also need the FinnHub API for financial data. All of our code is implemented with the free tier.
+TradingAgents supports multiple LLM providers. Set the API key for your chosen provider:
+
 ```bash
-export FINNHUB_API_KEY=$YOUR_FINNHUB_API_KEY
+export OPENAI_API_KEY=...          # OpenAI (GPT)
+export GOOGLE_API_KEY=...          # Google (Gemini)
+export ANTHROPIC_API_KEY=...       # Anthropic (Claude)
+export XAI_API_KEY=...             # xAI (Grok)
+export DEEPSEEK_API_KEY=...        # DeepSeek
+export DASHSCOPE_API_KEY=...       # Qwen (Alibaba DashScope)
+export ZHIPU_API_KEY=...           # GLM (Zhipu)
+export OPENROUTER_API_KEY=...      # OpenRouter
+export ALPHA_VANTAGE_API_KEY=...   # Alpha Vantage
 ```
 
-You will need the OpenAI API for all the agents.
+For enterprise providers (e.g. Azure OpenAI, AWS Bedrock), copy `.env.enterprise.example` to `.env.enterprise` and fill in your credentials.
+
+For local models, configure Ollama with `llm_provider: "ollama"` in your config.
+
+Alternatively, copy `.env.example` to `.env` and fill in your keys:
 ```bash
-export OPENAI_API_KEY=$YOUR_OPENAI_API_KEY
+cp .env.example .env
 ```
 
 ### CLI Usage
 
-You can also try out the CLI directly by running:
+Launch the interactive CLI:
 ```bash
-python -m cli.main
+tradingagents          # installed command
+python -m cli.main     # alternative: run directly from source
 ```
-You will see a screen where you can select your desired tickers, date, LLMs, research depth, etc.
+You will see a screen where you can select your desired tickers, analysis date, LLM provider, research depth, and more.
 
 <p align="center">
   <img src="assets/cli/cli_init.png" width="100%" style="display: inline-block; margin: 0 2%;">
@@ -150,7 +184,7 @@ An interface will appear showing results as they load, letting you track the age
 
 ### Implementation Details
 
-We built TradingAgents with LangGraph to ensure flexibility and modularity. We utilize `o1-preview` and `gpt-4o` as our deep thinking and fast thinking LLMs for our experiments. However, for testing purposes, we recommend you use `o4-mini` and `gpt-4.1-mini` to save on costs as our framework makes **lots of** API calls.
+We built TradingAgents with LangGraph to ensure flexibility and modularity. The framework supports multiple LLM providers: OpenAI, Google, Anthropic, xAI, DeepSeek, Qwen (Alibaba DashScope), GLM (Zhipu), OpenRouter, Ollama for local models, and Azure OpenAI for enterprise.
 
 ### Python Usage
 
@@ -163,7 +197,7 @@ from tradingagents.default_config import DEFAULT_CONFIG
 ta = TradingAgentsGraph(debug=True, config=DEFAULT_CONFIG.copy())
 
 # forward propagate
-_, decision = ta.propagate("NVDA", "2024-05-10")
+_, decision = ta.propagate("NVDA", "2026-01-15")
 print(decision)
 ```
 
@@ -173,28 +207,52 @@ You can also adjust the default configuration to set your own choice of LLMs, de
 from tradingagents.graph.trading_graph import TradingAgentsGraph
 from tradingagents.default_config import DEFAULT_CONFIG
 
-# Create a custom config
 config = DEFAULT_CONFIG.copy()
-config["deep_think_llm"] = "gpt-4.1-nano"  # Use a different model
-config["quick_think_llm"] = "gpt-4.1-nano"  # Use a different model
-config["max_debate_rounds"] = 1  # Increase debate rounds
-config["online_tools"] = True # Use online tools or cached data
+config["llm_provider"] = "openai"        # openai, google, anthropic, xai, deepseek, qwen, glm, openrouter, ollama, azure
+config["deep_think_llm"] = "gpt-5.4"     # Model for complex reasoning
+config["quick_think_llm"] = "gpt-5.4-mini" # Model for quick tasks
+config["max_debate_rounds"] = 2
 
-# Initialize with custom config
 ta = TradingAgentsGraph(debug=True, config=config)
-
-# forward propagate
-_, decision = ta.propagate("NVDA", "2024-05-10")
+_, decision = ta.propagate("NVDA", "2026-01-15")
 print(decision)
 ```
 
-> For `online_tools`, we recommend enabling them for experimentation, as they provide access to real-time data. The agents' offline tools rely on cached data from our **Tauric TradingDB**, a curated dataset we use for backtesting. We're currently in the process of refining this dataset, and we plan to release it soon alongside our upcoming projects. Stay tuned!
+See `tradingagents/default_config.py` for all configuration options.
 
-You can view the full list of configurations in `tradingagents/default_config.py`.
+## Persistence and Recovery
+
+TradingAgents persists two kinds of state across runs.
+
+### Decision log
+
+The decision log is always on. Each completed run appends its decision to `~/.tradingagents/memory/trading_memory.md`. On the next run for the same ticker, TradingAgents fetches the realised return (raw and alpha vs SPY), generates a one-paragraph reflection, and injects the most recent same-ticker decisions plus recent cross-ticker lessons into the Portfolio Manager prompt, so each analysis carries forward what worked and what didn't.
+
+Override the path with `TRADINGAGENTS_MEMORY_LOG_PATH`.
+
+### Checkpoint resume
+
+Checkpoint resume is opt-in via `--checkpoint`. When enabled, LangGraph saves state after each node so a crashed or interrupted run resumes from the last successful step instead of starting over. On a resume run you will see `Resuming from step N for <TICKER> on <date>` in the logs; on a new run you will see `Starting fresh`. Checkpoints are cleared automatically on successful completion.
+
+Per-ticker SQLite databases live at `~/.tradingagents/cache/checkpoints/<TICKER>.db` (override the base with `TRADINGAGENTS_CACHE_DIR`). Use `--clear-checkpoints` to reset all of them before a run.
+
+```bash
+tradingagents analyze --checkpoint           # enable for this run
+tradingagents analyze --clear-checkpoints    # reset before running
+```
+
+```python
+config = DEFAULT_CONFIG.copy()
+config["checkpoint_enabled"] = True
+ta = TradingAgentsGraph(config=config)
+_, decision = ta.propagate("NVDA", "2026-01-15")
+```
 
 ## Contributing
 
 We welcome contributions from the community! Whether it's fixing a bug, improving documentation, or suggesting a new feature, your input helps make this project better. If you are interested in this line of research, please consider joining our open-source financial AI research community [Tauric Research](https://tauric.ai/).
+
+Past contributions, including code, design feedback, and bug reports, are credited per release in [`CHANGELOG.md`](CHANGELOG.md).
 
 ## Citation
 
